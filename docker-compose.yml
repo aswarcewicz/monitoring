@@ -1,0 +1,69 @@
+version: '3'
+services:
+  influxdb:
+    build:
+      context: ./influxdb
+      args:
+        - DOCKER_INFLUXDB_HOME=$CONTAINER_INFLUXDB_HOME
+        - INFLUXDB_VERSION=1.3.7
+        - INFLUXDB_DIR_NAME_INSIDE_TAR=influxdb-1.3.7-1
+    container_name: influxdb
+    hostname: influxdb
+#    network_mode: "host"
+    networks:
+      container-monitoring-net:
+        aliases:
+          - influxdb
+    ports:
+      - "8086:8086"
+    volumes:
+     - $HOST_CONFIG_DIR_INFLUXDB:/etc/influxdb
+     - $HOST_LOGS_DIR_INFLUXDB:/var/log/influxdb
+     - $HOST_DATABASE_DIR_INFLUXDB:/var/lib/influxdb
+    command: ./start.sh
+
+  grafana:
+    build:
+      context: ./grafana
+      args:
+        - DOCKER_GRAFANA_HOME=$CONTAINER_GRAFANA_HOME
+        - GRAFANA_VERSION=4.6.1
+    container_name: grafana
+    hostname: grafana
+#    network_mode: "host"
+    networks:
+      container-monitoring-net:
+        aliases:
+          - grafana
+    ports:
+      - "3000:3000"
+    volumes:
+     - $HOST_CONFIG_DIR_GRAFANA:$CONTAINER_GRAFANA_HOME/conf
+     - $HOST_DATABASE_DIR_GRAFANA:$CONTAINER_GRAFANA_HOME/data
+    depends_on:
+      - influxdb
+    links:
+      - influxdb:influxdb
+    command: ./start.sh
+
+  icinga2:
+    build:
+      context: ./icinga2
+    container_name: icinga2
+    hostname: icinga2
+#    network_mode: "host"
+    networks:
+      container-monitoring-net:
+        aliases:
+          - icinga2
+    volumes:
+     - $HOST_CONFIG_DIR_ICINGA2:/etc/icinga2
+    depends_on:
+      - influxdb
+    links:
+      - influxdb:influxdb
+    command: ./start.sh
+
+networks:
+  container-monitoring-net:
+    external: true
