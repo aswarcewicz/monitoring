@@ -17,8 +17,8 @@ function checkMemory() {
 	memFreePercent=$((100 - $memUsedPercent))
 
 	swapTotalInKB=`echo "$memInfo" | grep "^SwapTotal" | awk '{print $2}'`
-	swapFree=`cat /proc/meminfo | grep "^SwapFree" | awk '{print $2}'`
-	swapCached=`cat /proc/meminfo | grep "^SwapCached" | awk '{print $2}'`
+	swapFree=`echo "$memInfo" | grep "^SwapFree" | awk '{print $2}'`
+	swapCached=`echo "$memInfo" | grep "^SwapCached" | awk '{print $2}'`
 	swapFreeInKB=$(($swapFree + $swapCached))
 	swapUsedInKB=$(($swapTotalInKB - $swapFreeInKB))
 
