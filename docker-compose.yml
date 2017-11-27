@@ -66,4 +66,3 @@ services:
 
 networks:
   container-monitoring-net:
-#    external: true
